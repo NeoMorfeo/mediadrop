@@ -80,6 +80,7 @@ more detail below:
     processes = 5
     home = /path/to/venv
     daemonize = /var/log/uwsgi.log
+    wsgi-file =  /path/to/mediadrop_install/deployment-scripts/uwsgi/mediadrop.wsgi
 
 ``socket:`` uWSGI will create a unix socket at this location on your system
 that will listen for incoming requests. You can also use a TCP socket, but if
@@ -98,6 +99,12 @@ check that this setting is correct first.
 
 ``daemonize:`` Run uWSGI in daemon mode, and log all data to the file specified.
 
+Now you need to modify the /path/to/mediadrop_install/deployment-scripts/uwsgi/mediadrop.wsgi file to your current setup.
+.. sourcecode:: python
+
+    deployment_config = '/path/to/deployment.ini'
+    temp_dir = '/tmp'
+
 Now that you have created a [uwsgi] ini block in deployment.ini, you can launch
 uWSGI and point to your ini file like this:
 
@@ -109,6 +116,8 @@ uWSGI and point to your ini file like this:
 If everything went well uWSGI will now be listening on the unix socket you
 specified above. Of course you still need to tell NGINX how to talk to uWSGI so
 let's configure that now.
+
+If this works, you can link the /path/to/deployment.ini file, into the uWSGI configuration folder to autoload on every startup, chech the uWSGI in your system to verify it.
 
 NGINX Configuration
 -------------------
@@ -163,6 +172,11 @@ configuration and will probably suit most use cases:
         location ~* ^/(appearance)/ {
                 root /path/to/data ;
                 break;
+        }
+        
+        # Alias needed for admin static resources
+        location ~* ^/(admin/)?(images/|scripts/|styles/)(.*) {
+                alias /path/to/mediadrop_install/mediadrop/public/$1$2$3;
         }
 
         # All media and podcast images
